@@ -1,0 +1,11 @@
+# quarantined samples never belong in the repo
+quarantine/*
+!quarantine/.gitkeep
+
+# PyInstaller build intermediates (only FourmanAV/ output is committed)
+_build/
+*.spec
+
+# Python
+__pycache__/
+*.pyc
