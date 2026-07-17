@@ -16,6 +16,8 @@ It is signature-based only (exact hash match). It will **not** catch anything
 that isn't already in the database, and is meant for learning, not as a
 replacement for a real AV.
 
+![Fourman AV scanning a folder and flagging a threat](docs/screenshot.png)
+
 ---
 
 ## Quick start (no build required)
