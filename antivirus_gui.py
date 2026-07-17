@@ -160,17 +160,26 @@ class AntivirusGUI:
 
         def worker():
             url = API_URL_TMPL.format(key=key)
+            tmp_path = HASHDB_PATH + ".tmp"
             # Also send the key as an Auth-Key header (newer API style).
-            cmd = ["curl", "-sS", "-L",
+            # --fail: don't write error response bodies (e.g. 401 JSON) as if
+            # they were the database; download to a temp file so a failed
+            # request never clobbers the existing recent.csv.
+            cmd = ["curl", "-sS", "-L", "--ssl-no-revoke", "--fail",
                    "-H", f"Auth-Key: {key}",
-                   "-o", HASHDB_PATH, url]
+                   "-o", tmp_path, url]
             try:
                 r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
                 if r.returncode != 0:
+                    if os.path.exists(tmp_path):
+                        os.remove(tmp_path)
                     self.msg_queue.put(("ERR", f"curl failed: {r.stderr.strip()}"))
                 else:
+                    os.replace(tmp_path, HASHDB_PATH)
                     self.msg_queue.put(("DBOK", None))
             except Exception as e:
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
                 self.msg_queue.put(("ERR", f"download error: {e}"))
 
         threading.Thread(target=worker, daemon=True).start()
